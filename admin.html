@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html data-bs-theme="light" lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>libraryy (Backup 1745072747542)</title>
+    <link rel="stylesheet" href="assets/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="assets/css/Footer-Basic-icons.css">
+    <link rel="stylesheet" href="assets/css/styles.css">
+</head>
+
+<body class="bg-dark-subtle mb-5">
+    <div class="container"><nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="admin.html">📚 لوحة تحكم الأدمن</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#adminNavbar" aria-controls="adminNavbar" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    
+    <div class="collapse navbar-collapse" id="adminNavbar">
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item">
+          <a class="nav-link" href="admin.html">🏠تاعت الادمن الرئيسية</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="admin-stats.html">📊 الإحصائيات</a>
+        </li>
+        <li class="nav-item">
+          <button class="btn btn-danger ms-3" id="admin-logout-btn">🚪 تسجيل الخروج</button>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+</div>
+    <div class="container">
+        <h1 class="text-center mt-5">لوحة تحكم المشرف 👑</h1>
+        <div class="row">
+            <div class="col-md-6 offset-md-3 d-flex flex-column mt-4 mb-5"><label class="form-label">عنوان الكتاب</label><input type="text" id="book-title"><label class="form-label mb-2" for="book-description">وصف الكتاب</label><textarea id="book-description" class="form-control mb-3" placeholder="كتب وصف الكتاب.." rows="3"></textarea><label class="form-label">رابط الصورة</label><input type="text" id="book-image"><label class="form-label">التصنيف</label><select id="book-category" class="form-select">
+                    <option value="Programming">برمجة</option>
+                    <option value="AI" selected="">ذكاء اصطناعي</option>
+                    <option value="Algorithms">خوارزميات</option>
+                    <option value="Networks">شبكات</option>
+                </select><label class="form-label">عدد النسخ</label><input type="number" id="book-quantity"><div class="form-check mt-2">
+  <input class="form-check-input" type="checkbox" id="suggested-book">
+  <label class="form-check-label" for="suggested-book">
+    📌 كتاب مقترح؟
+  </label>
+</div><button class="btn btn-primary w-100 mt-3" id="add-book-btn" type="submit">button</button></div>
+        </div>
+    </div>
+    <div class="container mb-5 mt-4">
+        <p class="fs-3 text-center">الكتب المتاحه في المكتبه</p>
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>📘 العنوان</th>
+                        <th>🧠 التصنيف</th>
+                        <th>📦 النسخ</th>
+                        <th>⚙️ التحكم</th>
+                    </tr>
+                </thead>
+                <tbody id="books-tbody">
+                    <tr></tr>
+                    <tr></tr>
+                </tbody>
+            </table>
+        </div>
+    </div><script>
+document.addEventListener("DOMContentLoaded", function () {
+  const titleInput = document.getElementById("book-title");
+  const imageInput = document.getElementById("book-image");
+  const categoryInput = document.getElementById("book-category");
+  const quantityInput = document.getElementById("book-quantity");
+  const suggestedCheckbox = document.getElementById("suggested-book");
+  const addBtn = document.getElementById("add-book-btn");
+  const booksTableBody = document.getElementById("books-tbody");
+
+  let books = JSON.parse(localStorage.getItem("libraryBooks")) || [];
+
+  function renderBooks() {
+    booksTableBody.innerHTML = "";
+
+    books.forEach((book, index) => {
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>${book.title}</td>
+        <td>${book.category}</td>
+        <td>${book.available}</td>
+        <td>
+          <button class="btn btn-sm btn-success me-1" onclick="changeQuantity(${index}, 1)">➕</button>
+          <button class="btn btn-sm btn-warning me-1" onclick="changeQuantity(${index}, -1)">➖</button>
+          <button class="btn btn-sm btn-danger" onclick="deleteBook(${index})">🗑</button>
+        </td>
+      `;
+      booksTableBody.appendChild(row);
+    });
+  }
+
+ addBtn.addEventListener("click", function () {
+  const title = titleInput.value.trim();
+  const image = imageInput.value.trim();
+  const category = categoryInput.value;
+  const quantity = parseInt(quantityInput.value);
+  const description = document.getElementById("book-description").value.trim();
+
+  if (!title || !image || !category || isNaN(quantity) || quantity < 1) {
+    alert("❗ يرجى تعبئة جميع الحقول بشكل صحيح.");
+    return;
+  }
+
+  const newBook = {
+    title: title,
+    image: image,
+    category: category,
+    available: quantity,
+    description: description,
+    suggested: suggestedCheckbox.checked
+  };
+
+  books.push(newBook);
+  localStorage.setItem("libraryBooks", JSON.stringify(books));
+  renderBooks();
+
+  // ✅ التنبيه بعد الإضافة
+  alert("✅ تم إضافة الكتاب بنجاح!");
+
+  // 🧼 تنظيف الحقول
+  titleInput.value = "";
+  imageInput.value = "";
+  categoryInput.selectedIndex = 0;
+  quantityInput.value = "";
+  document.getElementById("book-description").value = "";
+  suggestedCheckbox.checked = false;
+});
+
+
+  window.changeQuantity = function (index, change) {
+    books[index].available += change;
+    if (books[index].available < 0) books[index].available = 0;
+    localStorage.setItem("libraryBooks", JSON.stringify(books));
+    renderBooks();
+  };
+
+  window.deleteBook = function (index) {
+    if (confirm("هل أنت متأكد من حذف هذا الكتاب؟")) {
+      books.splice(index, 1);
+      localStorage.setItem("libraryBooks", JSON.stringify(books));
+      renderBooks();
+    }
+  };
+
+  renderBooks();
+});
+</script>
+<div class="d-flex justify-content-center">
+  <input
+    type="text"
+    id="email-filter"
+    class="form-control w-50 mb-3"
+    placeholder="🔍 ابحث بإيميل المستخدم"
+  >
+</div>
+<div class="d-flex justify-content-center">
+  <input
+    type="date"
+    id="date-filter"
+    class="form-control w-25 mb-3"
+    placeholder="📅 اختر تاريخ الاستعارة"
+  >
+</div>
+
+    <div class="container mb-5"><script src="js/admin.js"></script>
+
+        <h3 class="text-center mt-5">قائمة الاستعارات</h3>
+        <div class="table table-bordered mt-3">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>📧 البريد الإلكتروني</th>
+                        <th>📚 اسم الكتاب</th>
+                        <th>📅 تاريخ الاستعارة</th>
+                    </tr>
+                </thead>
+                <tbody id="borrow-log-body">
+                    <tr></tr>
+                    <tr></tr>
+                </tbody>
+            </table>
+        </div><h4 class="text-center mt-5">📊 إحصائيات الاستعارة</h4>
+<table class="table table-bordered text-center">
+  <thead>
+    <tr>
+      <th>📧 البريد الإلكتروني</th>
+      <th>📚 عدد الكتب المستعارة</th>
+    </tr>
+  </thead>
+  <tbody id="user-stats-body"></tbody>
+</table>
+<div class="text-center my-4">
+  <button id="export-pdf" class="btn btn-danger me-2">📄 تصدير PDF</button>
+  <button id="export-excel" class="btn btn-success">📊 تصدير Excel</button>
+</div>
+<!-- jsPDF لتوليد ملفات PDF -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<!-- SheetJS لتوليد ملفات Excel -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+    </div>
+    <div class="container">
+        <h1 class="text-center">🧩 إدارة التصنيفات</h1>
+        <form><label class="form-label">اسم التصنيف.</label><input class="form-control" type="text" id="category-name"></form><button class="btn btn-primary" id="add-category-btn" type="button">➕ إضافة تصنيف</button>
+        <p>📋 التصنيفات الحالية</p><script src="js/admin-categories.js"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const email = localStorage.getItem("userEmail");
+    const isAdmin = localStorage.getItem("isAdmin");
+
+    // 🔐 التحقق من صلاحية الدخول
+    if (!email || isAdmin !== "true") {
+      alert("🚫 ليس لديك صلاحية الوصول إلى هذه الصفحة.");
+      window.location.href = "admin-login.html"; // أو index.html حسب ما تفضل
+    }
+  });
+</script>
+<script>
+  document.getElementById("admin-logout-btn").addEventListener("click", function () {
+    localStorage.removeItem("userEmail");
+    localStorage.removeItem("isAdmin");
+    window.location.href = "admin-login.html";
+  });
+</script>
+
+
+
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>سم التصنيف</th>
+                        <th>إجراءات</th>
+                    </tr>
+                </thead>
+                <tbody id="categories-tbody"></tbody>
+            </table>
+        </div>
+    </div>
+    <script src="assets/bootstrap/js/bootstrap.min.js"></script>
+    <script src="assets/js/account.js"></script>
+    <script src="assets/js/admin-categories.js"></script>
+    <script src="assets/js/admin-login.js"></script>
+    <script src="assets/js/admin-stats.js"></script>
+    <script src="assets/js/admin.js"></script>
+    <script src="assets/js/books-data.js"></script>
+    <script src="assets/js/borrow.js"></script>
+    <script src="assets/js/display-books.js"></script>
+    <script src="assets/js/filter.js"></script>
+    <script src="assets/js/home-books.js"></script>
+    <script src="assets/js/login.js"></script>
+</body>
+
+</html>
