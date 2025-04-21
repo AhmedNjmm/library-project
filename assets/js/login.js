@@ -4,33 +4,27 @@ document.addEventListener("DOMContentLoaded", function () {
   const passwordInput = document.getElementById("login-password");
   const errorMsg = document.getElementById("login-error");
 
+  // 🧠  ما بتحتاج لانو اصلا هاد الملف منادي علي في اللوج ان ومهيأه هناك تهيئة Firebase
+
+  const auth = firebase.auth();
+
   form.addEventListener("submit", function (e) {
     e.preventDefault();
 
     const email = emailInput.value.trim();
     const password = passwordInput.value.trim();
 
-    // 🧠 نسحب الحسابات من localStorage
-    const accounts = JSON.parse(localStorage.getItem("accounts")) || [];
+    auth.signInWithEmailAndPassword(email, password)
+      .then(userCredential => {
+        localStorage.setItem("userEmail", email);
+        const isAdmin = (email === "admin@library.com");
+        localStorage.setItem("isAdmin", isAdmin ? "true" : "false");
 
-    // 🔍 ندور على تطابق
-    const matchedUser = accounts.find(acc => acc.email === email && acc.password === password);
-
-    if (matchedUser) {
-      // ✅ حفظ معلومات الدخول
-      localStorage.setItem("userEmail", email);
-
-      // 🔐 تحديد نوع الحساب
-      if (email === "admin@library.com") {
-        localStorage.setItem("isAdmin", "true");
-        window.location.href = "admin.html"; // تحويل للأدمن
-      } else {
-        localStorage.setItem("isAdmin", "false");
-        window.location.href = "index.html"; // تحويل للمستخدم العادي
-      }
-    } else {
-      // ❌ عرض رسالة خطأ إذا الحساب غير موجود
-      errorMsg.style.display = "block";
-    }
+        window.location.href = isAdmin ? "admin.html" : "index.html";
+      })
+      .catch(error => {
+        console.error("Firebase login error:", error.message);
+        errorMsg.style.display = "block";
+      });
   });
 });
