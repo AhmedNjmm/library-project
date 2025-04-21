@@ -8,6 +8,19 @@
     <link rel="stylesheet" href="assets/bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="assets/css/Footer-Basic-icons.css">
     <link rel="stylesheet" href="assets/css/styles.css">
+    <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-auth-compat.js"></script>
+    <script>
+      // ✅ التهيئة من مرة وحدة فقط
+      firebase.initializeApp({
+        apiKey: "AIzaSyDJq89s9gs3lGKj1eKM0eDD0Mein6mmm50",
+        authDomain: "library-project-f63b0.firebaseapp.com",
+        projectId: "library-project-f63b0",
+        storageBucket: "library-project-f63b0.appspot.com",
+        messagingSenderId: "91581535655",
+        appId: "1:91581535655:web:380c1e059ab48008855282"
+      });
+    </script>
 </head>
 
 <body>
@@ -27,22 +40,16 @@ document.addEventListener("DOMContentLoaded", function () {
       return;
     }
 
-    // جلب الحسابات المسجلة مسبقًا
-    const accounts = JSON.parse(localStorage.getItem("accounts")) || [];
+    const auth = firebase.auth();
 
-    // التحقق إذا الإيميل مستخدم من قبل
-    const exists = accounts.some(acc => acc.email === email);
-    if (exists) {
-      alert("⚠️ هذا البريد مسجّل بالفعل.");
-      return;
-    }
-
-    // إضافة الحساب الجديد مع تحديد النوع كطالب
-    accounts.push({ email, password, role: "student" });
-    localStorage.setItem("accounts", JSON.stringify(accounts));
-
-    alert("✅ تم إنشاء الحساب بنجاح!");
-    window.location.href = "login.html";
+    auth.createUserWithEmailAndPassword(email, password)
+      .then(userCredential => {
+        alert("✅ تم إنشاء الحساب بنجاح!");
+        window.location.href = "login.html";
+      })
+      .catch(error => {
+        alert("🚫 حدث خطأ: " + error.message);
+      });
   });
 });
 </script>
@@ -51,17 +58,6 @@ document.addEventListener("DOMContentLoaded", function () {
         </div>
     </div>
     <script src="assets/bootstrap/js/bootstrap.min.js"></script>
-    <script src="assets/js/account.js"></script>
-    <script src="assets/js/admin-categories.js"></script>
-    <script src="assets/js/admin-login.js"></script>
-    <script src="assets/js/admin-stats.js"></script>
-    <script src="assets/js/admin.js"></script>
-    <script src="assets/js/books-data.js"></script>
-    <script src="assets/js/borrow.js"></script>
-    <script src="assets/js/display-books.js"></script>
-    <script src="assets/js/filter.js"></script>
-    <script src="assets/js/home-books.js"></script>
-    <script src="assets/js/login.js"></script>
 </body>
 
 </html>
