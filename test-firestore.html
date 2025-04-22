@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Firebase Test</title>
+</head>
+<body>
+  <h1>🔥 Test Firestore Add</h1>
+  <button id="add-book">Add Test Book</button>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
+    import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDJq89s9gs3lGKj1eKM0eDD0Mein6mmm50",
+      authDomain: "library-project-f63b0.firebaseapp.com",
+      projectId: "library-project-f63b0",
+      storageBucket: "library-project-f63b0.firebasestorage.app",
+      messagingSenderId: "91581535655",
+      appId: "1:91581535655:web:380c1e059ab48008855282"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    document.getElementById("add-book").addEventListener("click", async () => {
+      try {
+        const docRef = await addDoc(collection(db, "books"), {
+          title: "Test from standalone",
+          description: "This is a standalone test",
+          createdAt: new Date()
+        });
+        console.log("✅ Book added with ID:", docRef.id);
+        alert("📘 Book added!");
+      } catch (e) {
+        console.error("❌ Error adding document:", e);
+        alert("⚠️ Failed to add book");
+      }
+    });
+  </script>
+</body>
+</html>
