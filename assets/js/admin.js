@@ -1,38 +1,46 @@
-import { db } from './firebase-config.js';
-import {
-  collection,
-  addDoc
-} from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
-
+// Firebase Firestore - Add book from Admin Panel
 document.addEventListener("DOMContentLoaded", function () {
-  const form = document.getElementById("add-book-form");
+  const addBookBtn = document.getElementById("add-book-btn");
+  const titleInput = document.getElementById("book-title");
+  const descriptionInput = document.getElementById("book-description");
+  const imageInput = document.getElementById("book-image");
+  const categoryInput = document.getElementById("book-category");
+  const quantityInput = document.getElementById("book-quantity");
+  const suggestedCheckbox = document.getElementById("book-suggested");
 
-  form.addEventListener("submit", async function (e) {
-    e.preventDefault();
+  // Firestore reference
+  const db = firebase.firestore();
+  const booksCollection = db.collection("books");
 
-    const title = document.getElementById("book-title").value;
-    const image = document.getElementById("book-image").value;
-    const category = document.getElementById("book-category").value;
-    const description = document.getElementById("book-description").value;
-    const quantity = parseInt(document.getElementById("book-quantity").value);
-    const isSuggested = document.getElementById("book-suggested").checked;
+  addBookBtn.addEventListener("click", function () {
+    const title = titleInput.value.trim();
+    const description = descriptionInput.value.trim();
+    const image = imageInput.value.trim();
+    const category = categoryInput.value;
+    const quantity = parseInt(quantityInput.value);
+    const suggested = suggestedCheckbox.checked;
 
-    try {
-      await addDoc(collection(db, "books"), {
-        title,
-        image,
-        category,
-        description,
-        available: quantity,
-        suggested: isSuggested,
-        createdAt: new Date()
-      });
-
-      alert("📚 تم إضافة الكتاب بنجاح!");
-      form.reset();
-    } catch (error) {
-      console.error("❌ خطأ أثناء الإضافة:", error);
-      alert("حدث خطأ أثناء إضافة الكتاب.");
+    if (!title || !description || !image || !category || isNaN(quantity)) {
+      alert("❗ الرجاء تعبئة جميع الحقول بشكل صحيح");
+      return;
     }
+
+    booksCollection.add({
+      title,
+      description,
+      image,
+      category,
+      quantity,
+      suggested,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    })
+    .then(() => {
+      alert("✅ تم إضافة الكتاب بنجاح إلى Firebase!");
+      // يمكنك بعدها إعادة تحميل الكتب تلقائياً أو تحديث الجدول
+    })
+    .catch(error => {
+      console.error("حدث خطأ أثناء إضافة الكتاب:", error.message);
+      alert("❌ فشل في إضافة الكتاب إلى قاعدة البيانات.");
+    });
   });
 });
