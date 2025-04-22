@@ -96,6 +96,17 @@
     <script src="assets/js/filter.js"></script>
     <script src="assets/js/home-books.js"></script>
     <script src="assets/js/login.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const email = localStorage.getItem("userEmail");
+    
+        if (!email) {
+          alert("🚫 يجب تسجيل الدخول أولًا!");
+          window.location.href = "login.html";
+        }
+      });
+    </script>
+    
 </body>
 
 </html>
