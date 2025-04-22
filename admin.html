@@ -188,7 +188,7 @@ function resetForm() {
 }
 let currentEditBookId = null; // 📌 معرف الكتاب اللي بنعدله
 
-window.fillForm = function (bookId, button) {
+window.fillForm = function (bookId) {
   db.collection("books").doc(bookId).get()
     .then(doc => {
       if (doc.exists) {
