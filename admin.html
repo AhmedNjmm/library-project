@@ -100,63 +100,74 @@ document.addEventListener("DOMContentLoaded", function () {
   const addBtn = document.getElementById("add-book-btn");
   const booksTableBody = document.getElementById("books-tbody");
 
-  let books = JSON.parse(localStorage.getItem("libraryBooks")) || [];
+  // ➕ زر إضافة كتاب إلى Firebase
+  addBtn.addEventListener("click", function () {
+    const title = titleInput.value.trim();
+    const image = imageInput.value.trim();
+    const category = categoryInput.value;
+    const quantity = parseInt(quantityInput.value);
+    const description = document.getElementById("book-description").value.trim();
+    const suggested = suggestedCheckbox.checked;
 
+    if (!title || !image || !category || isNaN(quantity) || quantity < 1) {
+      alert("❗ يرجى تعبئة جميع الحقول بشكل صحيح.");
+      return;
+    }
+
+    const newBook = {
+      title,
+      image,
+      category,
+      available: quantity,
+      description,
+      suggested
+    };
+
+    db.collection("books").add(newBook)
+      .then(() => {
+        alert("✅ تم إضافة الكتاب بنجاح إلى Firebase!");
+        titleInput.value = "";
+        imageInput.value = "";
+        categoryInput.selectedIndex = 0;
+        quantityInput.value = "";
+        document.getElementById("book-description").value = "";
+        suggestedCheckbox.checked = false;
+        renderBooks(); // إعادة تحميل الكتب
+      })
+      .catch(error => {
+        alert("🚫 حدث خطأ أثناء الإضافة: " + error.message);
+      });
+  });
+
+  // 📋 عرض الكتب من Firebase
   function renderBooks() {
     booksTableBody.innerHTML = "";
 
-    books.forEach((book, index) => {
-      const row = document.createElement("tr");
-      row.innerHTML = `
-        <td>${book.title}</td>
-        <td>${book.category}</td>
-        <td>${book.available}</td>
-        <td>
-          <button class="btn btn-sm btn-success me-1" onclick="changeQuantity(${index}, 1)">➕</button>
-          <button class="btn btn-sm btn-warning me-1" onclick="changeQuantity(${index}, -1)">➖</button>
-          <button class="btn btn-sm btn-danger" onclick="deleteBook(${index})">🗑</button>
-        </td>
-      `;
-      booksTableBody.appendChild(row);
-    });
+    db.collection("books").get()
+      .then(snapshot => {
+        snapshot.forEach(doc => {
+          const book = doc.data();
+          const row = document.createElement("tr");
+          row.innerHTML = `
+            <td>${book.title}</td>
+            <td>${book.category}</td>
+            <td>${book.available}</td>
+            <td><em>🛠️ التحكم غير مفعل بعد ربط Firebase</em></td>
+          `;
+          booksTableBody.appendChild(row);
+        });
+      })
+      .catch(error => {
+        console.error("خطأ في جلب الكتب من Firebase:", error.message);
+      });
   }
 
- addBtn.addEventListener("click", function () {
-  const title = titleInput.value.trim();
-  const image = imageInput.value.trim();
-  const category = categoryInput.value;
-  const quantity = parseInt(quantityInput.value);
-  const description = document.getElementById("book-description").value.trim();
-
-  if (!title || !image || !category || isNaN(quantity) || quantity < 1) {
-    alert("❗ يرجى تعبئة جميع الحقول بشكل صحيح.");
-    return;
-  }
-
-  const newBook = {
-    title: title,
-    image: image,
-    category: category,
-    available: quantity,
-    description: description,
-    suggested: suggestedCheckbox.checked
-  };
-
-  books.push(newBook);
-  localStorage.setItem("libraryBooks", JSON.stringify(books));
-  renderBooks();
-
-  // ✅ التنبيه بعد الإضافة
-  alert("✅ تم إضافة الكتاب بنجاح!");
-
-  // 🧼 تنظيف الحقول
-  titleInput.value = "";
-  imageInput.value = "";
-  categoryInput.selectedindex = 0;
-  quantityInput.value = "";
-  document.getElementById("book-description").value = "";
-  suggestedCheckbox.checked = false;
+  renderBooks(); // تحميل أولي للكتب
 });
+
+  
+
+
 
 
   window.changeQuantity = function (index, change) {
