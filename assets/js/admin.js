@@ -5,26 +5,6 @@ import {
 } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
 
 document.addEventListener("DOMContentLoaded", function () {
-  // 🧩 تحميل التصنيفات من localStorage مؤقتًا (لاحقًا بنربطها بـ Firebase)
-  const categorySelect = document.getElementById("book-category");
-
-  function تحديث_قائمة_التصنيفات() {
-    const categories = JSON.parse(localStorage.getItem("categories")) || [];
-
-    categorySelect.innerHTML = '<option disabled selected>اختر تصنيفًا</option>';
-
-    categories.forEach(cat => {
-      const option = document.createElement("option");
-      option.value = cat;
-      option.textContent = cat;
-      categorySelect.appendChild(option);
-    });
-  }
-
-  // أول تحميل للتصنيفات
-  تحديث_قائمة_التصنيفات();
-
-  // ✅ إضافة كتاب إلى Firestore عند إرسال النموذج
   const form = document.getElementById("add-book-form");
 
   form.addEventListener("submit", async function (e) {
@@ -49,7 +29,7 @@ document.addEventListener("DOMContentLoaded", function () {
       });
 
       alert("📚 تم إضافة الكتاب بنجاح!");
-      form.reset(); // تفريغ الحقول بعد الإضافة
+      form.reset();
     } catch (error) {
       console.error("❌ خطأ أثناء الإضافة:", error);
       alert("حدث خطأ أثناء إضافة الكتاب.");
