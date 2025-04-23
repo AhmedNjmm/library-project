@@ -130,7 +130,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // ✅ التصنيفات
   const nameInput = document.getElementById("category-name");
-  const searchInput = document.getElementById("category-search-input");
   const addCategoryBtn = document.getElementById("add-category-btn");
   const tbody = document.getElementById("categories-tbody");
 
@@ -150,10 +149,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   function renderCategories() {
     tbody.innerHTML = "";
-    const filterText = searchInput.value.trim().toLowerCase();
-    const filtered = categories.filter(c => c.name.toLowerCase().includes(filterText));
-
-    filtered.forEach(cat => {
+    categories.forEach(cat => {
       const row = document.createElement("tr");
       row.innerHTML = `
         <td>${cat.name}</td>
@@ -165,6 +161,24 @@ document.addEventListener("DOMContentLoaded", function () {
       tbody.appendChild(row);
     });
   }
+  // ✅ فلترة التصنيفات حسب البحث
+document.getElementById("category-search-input").addEventListener("input", function (e) {
+  const searchValue = e.target.value.toLowerCase();
+  const filtered = categories.filter(cat => cat.name.toLowerCase().includes(searchValue));
+  tbody.innerHTML = "";
+  filtered.forEach(cat => {
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td>${cat.name}</td>
+      <td>
+        <button class="btn btn-sm btn-primary me-1" onclick="editCategory('${cat.id}', '${cat.name}')">✏️ تعديل</button>
+        <button class="btn btn-sm btn-danger" onclick="deleteCategory('${cat.id}', '${cat.name}')">🗑 حذف</button>
+      </td>
+    `;
+    tbody.appendChild(row);
+  });
+});
+
 
   window.deleteCategory = function (docId, categoryName) {
     db.collection("books").where("category", "==", categoryName).get()
@@ -207,8 +221,6 @@ document.addEventListener("DOMContentLoaded", function () {
       })
       .catch(err => alert("❌ خطأ أثناء الإضافة: " + err.message));
   });
-
-  searchInput.addEventListener("input", renderCategories);
 
   fetchCategories();
 });
