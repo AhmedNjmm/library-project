@@ -7,13 +7,13 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // 🔐 تحقق من دخول الأدمن
   firebase.auth().onAuthStateChanged(user => {
-  console.log("🧪 تحقق من المستخدم:", user?.email); // ✅ هذا السطر رح يطبع الإيميل
+    console.log("🧪 تحقق من المستخدم:", user?.email); // ✅ هذا السطر رح يطبع الإيميل
 
-  if (!user || user.email !== "admin@library.com") {
-    alert("🚫 لا تملك صلاحية الوصول إلى هذه الصفحة");
-    window.location.href = "admin-login.html";
-  }
-});
+    if (!user || user.email !== "admin@library.com") {
+      alert("🚫 لا تملك صلاحية الوصول إلى هذه الصفحة");
+      window.location.href = "admin-login.html";
+    }
+  });
 
 
   // ✅ عناصر HTML
@@ -125,13 +125,14 @@ document.addEventListener("DOMContentLoaded", function () {
     addBtn.textContent = "📘 أضف الكتاب";
     addBtn.classList.replace("btn-success", "btn-primary");
   }
+   document.getElementById("admin-logout-btn").addEventListener("click", function () {
+    firebase.auth().signOut().then(() => {
+      window.location.href = "admin-login.html"; // ترجع لصفحة تسجيل الدخول
+    }).catch((error) => {
+      alert("❌ حدث خطأ أثناء تسجيل الخروج: " + error.message);
+    });
+  });
 
   renderBooks();
 });
-document.getElementById("admin-logout-btn").addEventListener("click", function () {
-  firebase.auth().signOut().then(() => {
-    window.location.href = "admin-login.html"; // ترجع لصفحة تسجيل الدخول
-  }).catch((error) => {
-    alert("❌ حدث خطأ أثناء تسجيل الخروج: " + error.message);
-  });
-});
+
