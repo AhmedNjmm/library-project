@@ -1,54 +1,47 @@
 <!DOCTYPE html>
-<html data-bs-theme="light" lang="en">
+<html lang="ar" dir="rtl" data-bs-theme="light">
 
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
-    <title>libraryy (Backup 1745072747542)</title>
-    <link rel="stylesheet" href="assets/bootstrap/css/bootstrap.min.css">
-    <link rel="stylesheet" href="assets/css/Footer-Basic-icons.css">
-    <link rel="stylesheet" href="assets/css/styles.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>تسجيل دخول الأدمن</title>
+  <link rel="stylesheet" href="assets/bootstrap/css/bootstrap.min.css">
+  <link rel="stylesheet" href="assets/css/styles.css">
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-auth-compat.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyDJq89s9gs3lGKj1eKM0eDD0Mein6mmm50",
+      authDomain: "library-project-f63b0.firebaseapp.com",
+      projectId: "library-project-f63b0",
+      storageBucket: "library-project-f63b0.appspot.com",
+      messagingSenderId: "91581535655",
+      appId: "1:91581535655:web:380c1e059ab48008855282"
+    };
+    firebase.initializeApp(firebaseConfig);
+  </script>
 </head>
 
-<body>
-    <div class="container"><html data-bs-theme="light" lang="en">
-<head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no" />
-    <title>Admin Login - University Library</title>
-</head>
-<body>
-    <div class="container d-flex justify-content-center align-items-center" style="min-height: 100vh;">
-        <div class="card w-100 p-4" style="max-width: 400px;">
-            <h4 class="text-center mb-4">تسجيل دخول المشرف</h4>
-            <form id="admin-login-form">
-                <label class="form-label">البريد الإلكتروني</label>
-                <input id="admin-email" class="form-control mb-3" type="email" placeholder="example@admin.com" />
+<body class="bg-light d-flex justify-content-center align-items-center" style="min-height: 100vh;">
+  <div class="card p-4 shadow" style="width: 100%; max-width: 400px;">
+    <h4 class="text-center mb-4">تسجيل دخول المشرف</h4>
+    <form id="admin-login-form">
+      <label class="form-label">📧 البريد الإلكتروني</label>
+      <input id="admin-email" class="form-control mb-3" type="email" placeholder="admin@library.com" required />
 
-                <label class="form-label">كلمة المرور</label>
-                <input id="admin-password" class="form-control mb-3" type="password" placeholder="••••••" />
+      <label class="form-label">🔒 كلمة المرور</label>
+      <input id="admin-password" class="form-control mb-3" type="password" placeholder="••••••••" required />
 
-                <button id="admin-login-btn" class="btn btn-primary w-100" type="submit">تسجيل الدخول</button>
+      <button id="admin-login-btn" class="btn btn-primary w-100" type="submit">🚪 تسجيل الدخول</button>
 
-                <p id="admin-login-error" class="text-danger text-center mt-3 d-none">❌ البريد الإلكتروني أو كلمة المرور غير صحيحة</p>
-            </form>
-        </div>
-    </div>
-</body>
-</html>
-</div>
-    <script src="assets/bootstrap/js/bootstrap.min.js"></script>
-    <script src="assets/js/account.js"></script>
-    <script src="assets/js/admin-categories.js"></script>
-    <script src="assets/js/admin-login.js"></script>
-    <script src="assets/js/admin-stats.js"></script>
-    <script src="assets/js/admin.js"></script>
-    <script src="assets/js/books-data.js"></script>
-    <script src="assets/js/borrow.js"></script>
-    <script src="assets/js/display-books.js"></script>
-    <script src="assets/js/filter.js"></script>
-    <script src="assets/js/home-books.js"></script>
-    <script src="assets/js/login.js"></script>
+      <p id="admin-login-error" class="text-danger text-center mt-3 d-none">❌ البريد الإلكتروني أو كلمة المرور غير صحيحة</p>
+    </form>
+  </div>
+
+  <script src="assets/bootstrap/js/bootstrap.min.js"></script>
+  <script src="assets/js/admin-login.js"></script>
 </body>
 
 </html>
