@@ -7,7 +7,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // 🔐 تحقق من دخول الأدمن
   auth.onAuthStateChanged(user => {
-    if (!user || user.email !== "admin@yourdomain.com") {
+    if (!user || user.email !== "admin@library.com") {
       alert("🚫 لا تملك صلاحية الوصول إلى هذه الصفحة");
       window.location.href = "admin-login.html";
     }
