@@ -7,9 +7,26 @@
   <title>📊 إحصائيات المشرف</title>
   <link rel="stylesheet" href="assets/bootstrap/css/bootstrap.min.css">
   <link rel="stylesheet" href="assets/css/styles.css">
+
+  <!-- Firebase (compat version) -->
   <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore-compat.js"></script>
+
+  <!-- Firebase init -->
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyDJq89s9gs3lGKj1eKM0eDD0Mein6mmm50",
+      authDomain: "library-project-f63b0.firebaseapp.com",
+      projectId: "library-project-f63b0",
+      storageBucket: "library-project-f63b0.appspot.com",
+      messagingSenderId: "91581535655",
+      appId: "1:91581535655:web:380c1e059ab48008855282"
+    };
+    firebase.initializeApp(firebaseConfig);
+  </script>
+
+  <!-- PDF & Excel libraries -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
@@ -25,41 +42,33 @@
     <h1 class="text-center mb-4">📊 لوحة الإحصائيات والاستعارات</h1>
 
     <div id="stats-summary" class="row text-center mb-4">
-      <div class="col-md-4"><div class="card p-3"><h4>📚 عدد الكتب</h4><p id="total-books">...</p></div></div>
-      <div class="col-md-4"><div class="card p-3"><h4>📁 عدد التصنيفات</h4><p id="total-categories">...</p></div></div>
-      <div class="col-md-4"><div class="card p-3"><h4>👥 عدد المستخدمين</h4><p id="total-users">...</p></div></div>
+      <div class="col-md-4">
+        <div class="card p-3">
+          <h4>📚 عدد الكتب</h4>
+          <p id="total-books">...</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card p-3">
+          <h4>📁 عدد التصنيفات</h4>
+          <p id="total-categories">...</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card p-3">
+          <h4>👥 عدد المستخدمين</h4>
+          <p id="total-users">...</p>
+        </div>
+      </div>
     </div>
 
-    <div class="row mb-3">
-      <div class="col-md-6 mb-2">
-        <input type="text" id="filter-email" class="form-control" placeholder="🔍 فلترة حسب البريد الإلكتروني">
-      </div>
-      <div class="col-md-6">
-        <input type="date" id="filter-date" class="form-control">
-      </div>
-    </div>
-
-    <h3 class="mb-3">📋 قائمة الاستعارات</h3>
+    <h3 class="mb-3">📋 المستخدمون</h3>
     <div class="table-responsive">
-      <table class="table table-bordered" id="borrows-table">
+      <table class="table table-bordered" id="users-table">
         <thead>
           <tr>
             <th>📧 البريد الإلكتروني</th>
-            <th>📘 اسم الكتاب</th>
-            <th>📅 تاريخ الاستعارة</th>
-          </tr>
-        </thead>
-        <tbody id="borrow-log-body"></tbody>
-      </table>
-    </div>
-
-    <h3 class="mt-5">👤 المستخدمون</h3>
-    <div class="table-responsive">
-      <table class="table table-striped">
-        <thead>
-          <tr>
-            <th>📧 البريد الإلكتروني</th>
-            <th>نوع الحساب</th>
+            <th>👤 نوع الحساب</th>
             <th>📚 عدد الكتب المستعارة</th>
           </tr>
         </thead>
@@ -68,13 +77,19 @@
     </div>
 
     <div class="text-center my-4">
-      <button class="btn btn-success me-2" onclick="exportToExcel()">📊 تصدير Excel</button>
-      <button class="btn btn-danger" onclick="exportToPDF()">📄 تصدير PDF</button>
+      <button class="btn btn-danger me-2" id="export-users-pdf">📄 تصدير PDF</button>
+      <button class="btn btn-success" id="export-users-excel">📊 تصدير Excel</button>
+    </div>
+
+    <div class="text-center my-4">
+      <button class="btn btn-danger me-2" id="export-stats-pdf">📄 PDF الإحصائيات</button>
+      <button class="btn btn-success" id="export-stats-excel">📊 Excel الإحصائيات</button>
     </div>
   </div>
 
-  <script src="assets/bootstrap/js/bootstrap.min.js"></script>
+  <!-- Main Script -->
   <script src="assets/js/admin-stats.js"></script>
+  <script src="assets/bootstrap/js/bootstrap.min.js"></script>
 </body>
 
 </html>
