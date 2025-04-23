@@ -1,5 +1,5 @@
 // ✅ admin.js
-// مسؤول عن إدارة الكتب + التحقق من دخول الأدمن
+// مسؤول عن إدارة الكتب والتصنيفات + التحقق من دخول الأدمن
 
 document.addEventListener("DOMContentLoaded", function () {
   const db = firebase.firestore();
@@ -7,15 +7,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // 🔐 تحقق من دخول الأدمن
   firebase.auth().onAuthStateChanged(user => {
-    // بدون alert
     if (!user || user.email !== "admin@library.com") {
       window.location.replace("unauthorized.html");
     }
   });
-  
-  
 
-  // ✅ عناصر HTML
+  // ✅ عناصر HTML - الكتب
   const titleInput = document.getElementById("book-title");
   const descriptionInput = document.getElementById("book-description");
   const imageInput = document.getElementById("book-image");
@@ -27,7 +24,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
   let currentEditBookId = null;
 
-  // ✅ عرض الكتب من Firestore
   function renderBooks() {
     booksTableBody.innerHTML = "";
     db.collection("books").orderBy("title").get()
@@ -41,8 +37,8 @@ document.addEventListener("DOMContentLoaded", function () {
             <td>${book.category}</td>
             <td>${book.available || 0}</td>
             <td>
-              <button class="btn btn-sm btn-warning me-1" onclick="fillForm(\"${bookId}\")">✏️ تعديل</button>
-              <button class="btn btn-sm btn-danger" onclick="deleteBook(\"${bookId}\")">🗑 حذف</button>
+              <button class="btn btn-sm btn-warning me-1" onclick="fillForm('${bookId}')">✏️ تعديل</button>
+              <button class="btn btn-sm btn-danger" onclick="deleteBook('${bookId}')">🗑 حذف</button>
             </td>
           `;
           booksTableBody.appendChild(row);
@@ -51,7 +47,6 @@ document.addEventListener("DOMContentLoaded", function () {
       .catch(err => alert("❌ خطأ أثناء جلب الكتب: " + err.message));
   }
 
-  // ✅ إضافة أو تحديث كتاب
   addBtn.addEventListener("click", () => {
     const title = titleInput.value.trim();
     const description = descriptionInput.value.trim();
@@ -83,7 +78,6 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
-  // ✅ تعبئة النموذج لتعديل كتاب
   window.fillForm = function (bookId) {
     db.collection("books").doc(bookId).get()
       .then(doc => {
@@ -102,7 +96,6 @@ document.addEventListener("DOMContentLoaded", function () {
       });
   }
 
-  // ✅ حذف كتاب
   window.deleteBook = function (bookId) {
     if (confirm("⚠️ هل تريد حذف هذا الكتاب؟")) {
       db.collection("books").doc(bookId).delete()
@@ -124,14 +117,71 @@ document.addEventListener("DOMContentLoaded", function () {
     addBtn.textContent = "📘 أضف الكتاب";
     addBtn.classList.replace("btn-success", "btn-primary");
   }
-   document.getElementById("admin-logout-btn").addEventListener("click", function () {
+
+  document.getElementById("admin-logout-btn").addEventListener("click", function () {
     firebase.auth().signOut().then(() => {
-      window.location.href = "admin-login.html"; // ترجع لصفحة تسجيل الدخول
+      window.location.href = "admin-login.html";
     }).catch((error) => {
       alert("❌ حدث خطأ أثناء تسجيل الخروج: " + error.message);
     });
   });
 
   renderBooks();
-});
 
+  // ✅ التصنيفات
+  const categoryInputField = document.getElementById("new-category-input");
+  const addCategoryBtn = document.getElementById("add-category-btn");
+  const categoryTable = document.getElementById("categories-tbody");
+
+  function renderCategories() {
+    categoryTable.innerHTML = "";
+    db.collection("categories").orderBy("name").get().then(snapshot => {
+      snapshot.forEach(doc => {
+        const cat = doc.data();
+        const id = doc.id;
+
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${cat.name}</td>
+          <td>
+            <button class="btn btn-sm btn-danger" onclick="deleteCategory('${id}')">🗑 حذف</button>
+            <button class="btn btn-sm btn-primary" onclick="editCategory('${id}', '${cat.name}')">✏️ تعديل</button>
+          </td>
+        `;
+        categoryTable.appendChild(row);
+      });
+    });
+  }
+
+  window.deleteCategory = function (id) {
+    if (confirm("⚠️ هل تريد حذف هذا التصنيف؟")) {
+      db.collection("categories").doc(id).delete().then(() => {
+        alert("✅ تم حذف التصنيف");
+        renderCategories();
+      });
+    }
+  }
+
+  window.editCategory = function (id, oldName) {
+    const newName = prompt("✏️ أدخل اسم جديد للتصنيف:", oldName);
+    if (newName && newName.trim() !== "") {
+      db.collection("categories").doc(id).update({ name: newName.trim() }).then(() => {
+        alert("✅ تم تعديل التصنيف");
+        renderCategories();
+      });
+    }
+  }
+
+  addCategoryBtn.addEventListener("click", () => {
+    const name = categoryInputField.value.trim();
+    if (!name) return alert("❗ الرجاء إدخال اسم التصنيف");
+
+    db.collection("categories").add({ name }).then(() => {
+      alert("✅ تم إضافة التصنيف");
+      categoryInputField.value = "";
+      renderCategories();
+    });
+  });
+
+  renderCategories();
+});
