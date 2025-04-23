@@ -128,3 +128,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
   renderBooks();
 });
+document.getElementById("admin-logout-btn").addEventListener("click", function () {
+  firebase.auth().signOut().then(() => {
+    window.location.href = "admin-login.html"; // ترجع لصفحة تسجيل الدخول
+  }).catch((error) => {
+    alert("❌ حدث خطأ أثناء تسجيل الخروج: " + error.message);
+  });
+});
