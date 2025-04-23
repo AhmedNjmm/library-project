@@ -65,10 +65,14 @@
         });
 
         function logout() {
-          localStorage.removeItem("userEmail");
-          localStorage.removeItem("isAdmin");
-          window.location.href = "login.html";
-        }
+  firebase.auth().signOut().then(() => {
+    localStorage.removeItem("isAdmin"); // إذا حابب تحتفظ بهذا
+    window.location.href = "login.html";
+  }).catch((error) => {
+    alert("❌ خطأ أثناء تسجيل الخروج: " + error.message);
+  });
+}
+
       </script>
     </div>
   </nav>

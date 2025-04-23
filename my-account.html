@@ -69,10 +69,14 @@
     });
 
     function logout() {
-      firebase.auth().signOut().then(() => {
-        window.location.href = "login.html";
-      });
-    }
+  firebase.auth().signOut().then(() => {
+    localStorage.removeItem("isAdmin"); // إذا حابب تحتفظ بهذا
+    window.location.href = "login.html";
+  }).catch((error) => {
+    alert("❌ خطأ أثناء تسجيل الخروج: " + error.message);
+  });
+}
+
 
     function returnBook(borrowId) {
       if (confirm("هل أنت متأكد من أنك تريد إرجاع هذا الكتاب؟")) {

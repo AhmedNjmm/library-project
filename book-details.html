@@ -1,7 +1,5 @@
-
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -23,7 +21,6 @@
     firebase.initializeApp(firebaseConfig);
   </script>
 </head>
-
 <body class="bg-light">
   <div class="container py-5">
     <div class="row">
@@ -50,11 +47,20 @@
     let bookData;
 
     firebase.auth().onAuthStateChanged(async user => {
-      if (!user) return location.href = "login.html";
-      currentUser = user;
-
       if (!bookId) return alert("❌ لم يتم العثور على الكتاب.");
 
+      // إذا المستخدم غير مسجل دخول
+      if (!user) {
+        document.getElementById("borrow-btn").addEventListener("click", () => {
+          alert("❗ يجب تسجيل الدخول أولاً للاستعارة.");
+          window.location.href = "login.html";
+        });
+        return;
+      }
+
+      currentUser = user;
+
+      // جلب بيانات الكتاب
       const doc = await db.collection("books").doc(bookId).get();
       if (!doc.exists) return alert("❌ هذا الكتاب غير موجود.");
 
@@ -85,7 +91,8 @@
 
       borrowBtn.addEventListener("click", async () => {
         const now = new Date();
-        const formattedDate = `${now.getFullYear()}-${(now.getMonth()+1).toString().padStart(2,'0')}-${now.getDate().toString().padStart(2,'0')}`;
+        const formattedDate = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}-${now.getDate().toString().padStart(2, '0')}`;
+
         await db.collection("borrows").add({
           user: user.email,
           bookTitle: bookData.title,
@@ -106,6 +113,7 @@
         await db.collection("books").doc(bookId).update({
           available: bookData.available + 1
         });
+
         alert("🔁 تم إرجاع الكتاب!");
         location.reload();
       });
@@ -114,5 +122,4 @@
 
   <script src="assets/bootstrap/js/bootstrap.min.js"></script>
 </body>
-
 </html>

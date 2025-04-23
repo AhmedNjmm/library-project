@@ -1,65 +1,63 @@
+// ✅ admin-stats.js (محدث بالكامل لـ Firebase)
+
 document.addEventListener("DOMContentLoaded", function () {
+  const db = firebase.firestore();
   const usersTbody = document.getElementById("users-tbody");
-
-  const accounts = JSON.parse(localStorage.getItem("accounts")) || [];
-  const borrowLog = [];
-
-  // 🔍 جلب بيانات الاستعارات
-  for (let key in localStorage) {
-    if (key.startsWith("borrowedBooks_")) {
-      const email = key.replace("borrowedBooks_", "");
-      const books = JSON.parse(localStorage.getItem(key)) || [];
-      borrowLog.push({ email, count: books.length });
-    }
-  }
-
-  // 🗺️ خريطة عدد الاستعارات لكل مستخدم
-  const borrowMap = {};
-  borrowLog.forEach(entry => {
-    borrowMap[entry.email] = entry.count;
-  });
-
-  // 👤 عرض المستخدمين
-  accounts.forEach(user => {
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${user.email}</td>
-      <td>${user.email === "admin@library.com" ? "مشرف" : "طالب"}</td>
-      <td>${borrowMap[user.email] || 0}</td>
-    `;
-    usersTbody.appendChild(tr);
-  });
-
-  // 📊 عرض الإحصائيات
   const totalBooksSpan = document.getElementById("total-books");
   const totalCategoriesSpan = document.getElementById("total-categories");
   const totalUsersSpan = document.getElementById("total-users");
 
-  const books = JSON.parse(localStorage.getItem("libraryBooks")) || [];
-  const categories = JSON.parse(localStorage.getItem("categories")) || [];
+  // ✅ جلب عدد الكتب
+  db.collection("books").get().then(snapshot => {
+    totalBooksSpan.textContent = snapshot.size;
+  });
 
-  totalBooksSpan.textContent = books.length;
-  totalCategoriesSpan.textContent = categories.length;
-  totalUsersSpan.textContent = accounts.length;
+  // ✅ جلب عدد التصنيفات
+  db.collection("categories").get().then(snapshot => {
+    totalCategoriesSpan.textContent = snapshot.size;
+  });
+
+  // ✅ جلب الاستعارات لكل مستخدم
+  const borrowMap = {}; // { email: count }
+  db.collection("borrows").get().then(snapshot => {
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      if (!borrowMap[data.user]) {
+        borrowMap[data.user] = 0;
+      }
+      borrowMap[data.user]++;
+    });
+
+    // ✅ عرض المستخدمين (من قائمة المستخدمين في الاستعارات فقط)
+    const uniqueEmails = Object.keys(borrowMap);
+    totalUsersSpan.textContent = uniqueEmails.length;
+    usersTbody.innerHTML = "";
+
+    uniqueEmails.forEach(email => {
+      const tr = document.createElement("tr");
+      const type = email === "admin@library.com" ? "مشرف" : "طالب";
+      tr.innerHTML = `
+        <td>${email}</td>
+        <td>${type}</td>
+        <td>${borrowMap[email]}</td>
+      `;
+      usersTbody.appendChild(tr);
+    });
+  });
 
   // 📄 تصدير المستخدمين PDF
   document.getElementById("export-users-pdf").addEventListener("click", () => {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
-
     doc.text("📄 قائمة المستخدمين", 20, 20);
-    let y = 30;
-
     const rows = Array.from(document.querySelectorAll("#users-tbody tr")).map(tr => {
       return Array.from(tr.querySelectorAll("td")).map(td => td.innerText);
     });
-
     doc.autoTable({
-      startY: y,
+      startY: 30,
       head: [["البريد الإلكتروني", "نوع الحساب", "عدد الكتب"]],
       body: rows,
     });
-
     doc.save("users-report.pdf");
   });
 
@@ -73,7 +71,6 @@ document.addEventListener("DOMContentLoaded", function () {
         "📚 عدد الكتب": cells[2].innerText
       };
     });
-
     const ws = XLSX.utils.json_to_sheet(rows);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "المستخدمين");
@@ -85,19 +82,16 @@ document.addEventListener("DOMContentLoaded", function () {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
     doc.text("📈 إحصائيات عامة", 20, 20);
-
-    let y = 30;
     const stats = [
       ["عدد الكتب في المكتبة", totalBooksSpan.textContent],
       ["عدد التصنيفات", totalCategoriesSpan.textContent],
       ["عدد المستخدمين", totalUsersSpan.textContent],
     ];
-
+    let y = 30;
     stats.forEach(([label, value]) => {
       doc.text(`${label}: ${value}`, 20, y);
       y += 10;
     });
-
     doc.save("stats-report.pdf");
   });
 
@@ -108,7 +102,6 @@ document.addEventListener("DOMContentLoaded", function () {
       "🧩 عدد التصنيفات": totalCategoriesSpan.textContent,
       "👥 عدد المستخدمين": totalUsersSpan.textContent
     }];
-
     const ws = XLSX.utils.json_to_sheet(rows);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "الإحصائيات");

@@ -1,4 +1,4 @@
-<!-- ✅ books.html (مربوطة مع Firebase) -->
+
 <!DOCTYPE html>
 <html lang="ar" dir="rtl" data-bs-theme="light">
 
@@ -73,9 +73,17 @@
         return;
       }
       noBooksMsg.style.display = "none";
+
+      const email = localStorage.getItem("userEmail");
+
       books.forEach(book => {
         const col = document.createElement("div");
         col.className = "col";
+
+        const borrowButton = email
+          ? `<button class="btn btn-success mt-2" onclick="borrowFromCard('${book.id}', '${book.title}')">📚 استعارة</button>`
+          : `<button class="btn btn-secondary mt-2" onclick="alert('🚫 يجب تسجيل الدخول أولاً!')">📚 تسجيل الدخول للاستعارة</button>`;
+
         col.innerHTML = `
           <div class="card h-100">
             <img src="${book.image}" class="card-img-top" alt="...">
@@ -83,7 +91,8 @@
               <h5 class="card-title">${book.title}</h5>
               <p class="card-text">${book.description.substring(0, 100)}...</p>
               <p><span class="badge bg-info">${book.category}</span></p>
-              <a href="book-details.html?id=${book.id}" class="btn btn-primary">عرض التفاصيل</a>
+              <a href="book-details.html?id=${book.id}" class="btn btn-primary w-100">عرض التفاصيل</a>
+              ${borrowButton}
             </div>
           </div>
         `;
@@ -129,6 +138,43 @@
     });
 
     fetchBooks();
+
+    async function borrowFromCard(bookId, bookTitle) {
+      const userEmail = localStorage.getItem("userEmail");
+      if (!userEmail) {
+        alert("🚫 يجب تسجيل الدخول أولاً!");
+        return;
+      }
+
+      const bookRef = db.collection("books").doc(bookId);
+      const bookSnap = await bookRef.get();
+
+      if (!bookSnap.exists) return alert("❌ الكتاب غير موجود.");
+      const book = bookSnap.data();
+
+      if (book.available <= 0) return alert("🚫 لا توجد نسخ متاحة.");
+
+      const borrowSnap = await db.collection("borrows")
+        .where("user", "==", userEmail)
+        .where("bookTitle", "==", bookTitle)
+        .get();
+
+      if (!borrowSnap.empty) return alert("📚 لقد استعرت هذا الكتاب مسبقاً.");
+
+      const now = new Date();
+      const date = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+
+      await db.collection("borrows").add({
+        user: userEmail,
+        bookTitle: bookTitle,
+        date: date
+      });
+
+      await bookRef.update({ available: book.available - 1 });
+
+      alert("✅ تم استعارة الكتاب!");
+      fetchBooks();
+    }
   </script>
   <script src="assets/bootstrap/js/bootstrap.min.js"></script>
 </body>
