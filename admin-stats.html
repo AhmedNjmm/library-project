@@ -53,95 +53,28 @@
       </table>
     </div>
 
+    <h3 class="mt-5">👤 المستخدمون</h3>
+    <div class="table-responsive">
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th>📧 البريد الإلكتروني</th>
+            <th>نوع الحساب</th>
+            <th>📚 عدد الكتب المستعارة</th>
+          </tr>
+        </thead>
+        <tbody id="users-tbody"></tbody>
+      </table>
+    </div>
+
     <div class="text-center my-4">
       <button class="btn btn-success me-2" onclick="exportToExcel()">📊 تصدير Excel</button>
       <button class="btn btn-danger" onclick="exportToPDF()">📄 تصدير PDF</button>
     </div>
   </div>
 
-  <script>
-    const db = firebase.firestore();
-    let borrowData = [];
-
-    firebase.auth().onAuthStateChanged(async user => {
-      if (!user || user.email !== "admin@library.com") {
-        window.location.replace("unauthorized.html");
-        return;
-      }
-
-      const booksCount = await db.collection("books").get().then(snap => snap.size);
-      const catsCount = await db.collection("categories").get().then(snap => snap.size);
-      const borrowsSnap = await db.collection("borrows").get();
-      const users = new Set();
-
-      document.getElementById("total-books").textContent = booksCount;
-      document.getElementById("total-categories").textContent = catsCount;
-
-      const tbody = document.getElementById("borrow-log-body");
-      tbody.innerHTML = "";
-      borrowData = [];
-
-      borrowsSnap.forEach(doc => {
-        const b = doc.data();
-        users.add(b.user);
-        borrowData.push({ user: b.user, title: b.bookTitle, date: b.date });
-      });
-      document.getElementById("total-users").textContent = users.size;
-      renderTable();
-    });
-
-    function renderTable() {
-      const tbody = document.getElementById("borrow-log-body");
-      const emailFilter = document.getElementById("filter-email").value.toLowerCase();
-      const dateFilter = document.getElementById("filter-date").value;
-      tbody.innerHTML = "";
-
-      borrowData.forEach(entry => {
-        if (
-          (!emailFilter || entry.user.toLowerCase().includes(emailFilter)) &&
-          (!dateFilter || entry.date === dateFilter)
-        ) {
-          const row = document.createElement("tr");
-          row.innerHTML = `<td>${entry.user}</td><td>${entry.title}</td><td>${entry.date}</td>`;
-          tbody.appendChild(row);
-        }
-      });
-    }
-
-    document.getElementById("filter-email").addEventListener("input", renderTable);
-    document.getElementById("filter-date").addEventListener("change", renderTable);
-
-    function exportToExcel() {
-      const visibleRows = Array.from(document.querySelectorAll("#borrow-log-body tr")).map(row => {
-        return Array.from(row.children).map(cell => cell.textContent);
-      });
-      const ws = XLSX.utils.aoa_to_sheet([["البريد الإلكتروني", "اسم الكتاب", "تاريخ الاستعارة"], ...visibleRows]);
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, "Borrow Log");
-      XLSX.writeFile(wb, "borrow-log.xlsx");
-    }
-
-    function exportToPDF() {
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF();
-      doc.text("📋 سجل الاستعارات", 10, 10);
-
-      const visibleRows = Array.from(document.querySelectorAll("#borrow-log-body tr")).map(row => {
-        return Array.from(row.children).map(cell => cell.textContent);
-      });
-
-      doc.autoTable({
-        head: [["البريد الإلكتروني", "اسم الكتاب", "تاريخ الاستعارة"]],
-        body: visibleRows,
-        startY: 20,
-        styles: { font: "helvetica", fontSize: 10 }
-      });
-
-      doc.save("borrow-log.pdf");
-    }
-  </script>
-
   <script src="assets/bootstrap/js/bootstrap.min.js"></script>
+  <script src="assets/js/admin-stats.js"></script>
 </body>
 
 </html>
