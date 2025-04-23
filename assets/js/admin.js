@@ -7,14 +7,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // 🔐 تحقق من دخول الأدمن
   firebase.auth().onAuthStateChanged(user => {
-    console.log("🧪 تحقق من المستخدم:", user?.email); // ✅ هذا السطر رح يطبع الإيميل
-  
-    if (!user || user.email !== "admin@library.com") {
-      alert("🚫 لا تملك صلاحية الوصول إلى هذه الصفحة");
-      window.location.href = "admin-login.html";
-    }
-  });
-  
+  console.log("🧪 تحقق من المستخدم:", user?.email); // ✅ هذا السطر رح يطبع الإيميل
+
+  if (!user || user.email !== "admin@library.com") {
+    alert("🚫 لا تملك صلاحية الوصول إلى هذه الصفحة");
+    window.location.href = "admin-login.html";
+  }
+});
+
 
   // ✅ عناصر HTML
   const titleInput = document.getElementById("book-title");
