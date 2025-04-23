@@ -7,14 +7,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // 🔐 تحقق من دخول الأدمن
   firebase.auth().onAuthStateChanged(user => {
-    console.log("🧪 تحقق من المستخدم:", user?.email);
+    // بدون alert
     if (!user || user.email !== "admin@library.com") {
-      if (!window.location.href.includes("admin-login.html")) {
-        alert("🚫 لا تملك صلاحية الوصول إلى هذه الصفحة");
-      }
-      window.location.href = "admin-login.html";
+      window.location.replace("admin-login.html");
     }
   });
+  
   
 
   // ✅ عناصر HTML
