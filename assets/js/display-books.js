@@ -1,120 +1,70 @@
-document.addEventListener("DOMContentLoaded", function () {
-  const allBooks = JSON.parse(localStorage.getItem("libraryBooks")) || [];
-  const email = localStorage.getItem("userEmail");
-  const userKey = `borrowedBooks_${email}`;
-  const userBooks = JSON.parse(localStorage.getItem(userKey)) || [];
-  const container = document.getElementById("books-row");
+// ✅ عرض الكتب في صفحة books.html من Firestore
+const db = firebase.firestore();
 
-  function renderBooks(filteredBooks) {
-    container.innerHTML = "";
+const booksRow = document.getElementById("books-row");
+const categoryFilters = document.getElementById("category-filters");
+let allBooks = [];
 
-    if (filteredBooks.length === 0) {
-      container.innerHTML = `
-        <div class="col">
-          <div class="alert alert-warning text-center">🚫 لا توجد كتب في هذا التصنيف.</div>
-        </div>
-      `;
-      return;
-    }
+// 🔄 تحميل الكتب من Firestore
+function loadBooksFromFirestore() {
+  db.collection("books").orderBy("title").get().then(snapshot => {
+    allBooks = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    renderBooks("All");
+    generateCategoryButtons();
+  });
+}
 
-    filteredBooks.forEach(book => {
-      const col = document.createElement("div");
-      col.className = "col";
+// 📋 عرض الكتب بناءً على التصنيف
+function renderBooks(category = "All") {
+  booksRow.innerHTML = "";
 
-      const isBorrowed = userBooks.some(b => b.title === book.title);
+  const filteredBooks = category === "All" ? allBooks : allBooks.filter(book => book.category === category);
 
-      let buttonsHTML = "";
-
-      if (isBorrowed) {
-        buttonsHTML = `
-          <button class="btn btn-secondary w-100 mb-2" disabled>✅ مستعار</button>
-          <button class="btn btn-danger w-100" onclick="returnBook('${book.title}')">🔁 إرجاع</button>
-        `;
-      } else if (book.available > 0) {
-        buttonsHTML = `
-          <button class="btn btn-success w-100" onclick="borrowBook('${book.title}')">📚 استعارة</button>
-        `;
-      } else {
-        buttonsHTML = `
-          <button class="btn btn-secondary w-100" disabled>🚫 غير متاح</button>
-        `;
-      }
-
-      col.innerHTML = `
-        <div class="card h-100 shadow-sm">
-          <img src="${book.image}" class="card-img-top" style="height: 200px; object-fit: cover;" alt="${book.title}">
-          <div class="card-body d-flex flex-column justify-content-between">
-            <h5 class="card-title">${book.title}</h5>
-            <p class="card-text">📦 النسخ المتاحة: <strong>${book.available}</strong></p>
-            ${buttonsHTML}
-            <a href="book-details.html?title=${encodeURIComponent(book.title)}" class="btn btn-outline-primary mt-2">📖 تفاصيل</a>
-          </div>
-        </div>
-      `;
-
-      container.appendChild(col);
-    });
+  if (filteredBooks.length === 0) {
+    document.getElementById("no-books").style.display = "block";
+    return;
+  } else {
+    document.getElementById("no-books").style.display = "none";
   }
 
-  // عرض كل الكتب أول مرة
-  renderBooks(allBooks);
-
-  // البحث
-  const searchForm = document.getElementById("search-form");
-  const searchInput = document.getElementById("search-input");
-
-  searchInput.addEventListener("input", () => {
-    const searchTerm = searchInput.value.toLowerCase();
-    const filtered = allBooks.filter(book =>
-      book.title.toLowerCase().includes(searchTerm)
-    );
-    renderBooks(filtered);
+  filteredBooks.forEach(book => {
+    const col = document.createElement("div");
+    col.className = "col";
+    col.innerHTML = `
+      <div class="card shadow-sm">
+        <img src="${book.image}" class="card-img-top" alt="cover" style="height: 200px; object-fit: cover;">
+        <div class="card-body">
+          <h5 class="card-title">${book.title}</h5>
+          <p class="card-text text-muted">📦 ${book.available} نسخة</p>
+          <a href="book-details.html?id=${book.id}" class="btn btn-primary w-100">📖 تفاصيل</a>
+        </div>
+      </div>
+    `;
+    booksRow.appendChild(col);
   });
+}
 
-  searchForm.addEventListener("submit", function (e) {
-    e.preventDefault();
-    const searchTerm = searchInput.value.toLowerCase();
-    const filtered = allBooks.filter(book =>
-      book.title.toLowerCase().includes(searchTerm)
-    );
-    renderBooks(filtered);
-  });
-
-  // 🔄 توليد أزرار التصنيفات تلقائيًا
-  const categories = JSON.parse(localStorage.getItem("categories")) || [];
-  const filtersContainer = document.getElementById("category-filters");
-
-  filtersContainer.innerHTML = ''; // نفرغ الموجود أولاً
-
-  const allBtn = document.createElement("button");
-  allBtn.className = "btn btn-outline-primary filter-btn";
-  allBtn.dataset.category = "All";
-  allBtn.textContent = "📚 الكل";
-  filtersContainer.appendChild(allBtn);
-
-  categories.forEach(cat => {
-    const btn = document.createElement("button");
-    btn.className = "btn btn-outline-primary filter-btn";
-    btn.dataset.category = cat;
-    btn.textContent = cat;
-    filtersContainer.appendChild(btn);
-  });
-
-  // 🧠 ربط أزرار الفلترة
-  function setupFilterButtons() {
-    const filterButtons = document.querySelectorAll(".filter-btn");
-    filterButtons.forEach(btn => {
-      btn.addEventListener("click", () => {
-        const category = btn.dataset.category;
-        if (category === "All") {
-          renderBooks(allBooks);
-        } else {
-          const filtered = allBooks.filter(book => book.category === category);
-          renderBooks(filtered);
-        }
-      });
+// 🔘 توليد أزرار التصنيفات
+function generateCategoryButtons() {
+  db.collection("categories").get().then(snapshot => {
+    categoryFilters.innerHTML = '<button class="btn btn-outline-primary filter-btn" data-category="All">📚 الكل</button>';
+    snapshot.forEach(doc => {
+      const name = doc.data().name;
+      const btn = document.createElement("button");
+      btn.className = "btn btn-outline-primary filter-btn";
+      btn.setAttribute("data-category", name);
+      btn.textContent = name;
+      categoryFilters.appendChild(btn);
     });
-  }
+  });
+}
 
-  setupFilterButtons();
+// 🖱️ التعامل مع الفلاتر
+categoryFilters.addEventListener("click", e => {
+  if (e.target.classList.contains("filter-btn")) {
+    const selected = e.target.getAttribute("data-category");
+    renderBooks(selected);
+  }
 });
+
+loadBooksFromFirestore();

@@ -9,7 +9,7 @@ document.addEventListener("DOMContentLoaded", function () {
   firebase.auth().onAuthStateChanged(user => {
     // بدون alert
     if (!user || user.email !== "admin@library.com") {
-      window.location.replace("admin-login.html");
+      window.location.replace("unauthorized.html");
     }
   });
   
