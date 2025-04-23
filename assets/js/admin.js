@@ -129,59 +129,80 @@ document.addEventListener("DOMContentLoaded", function () {
   renderBooks();
 
   // ✅ التصنيفات
-  const categoryInputField = document.getElementById("new-category-input");
+  const nameInput = document.getElementById("category-name");
   const addCategoryBtn = document.getElementById("add-category-btn");
-  const categoryTable = document.getElementById("categories-tbody");
+  const tbody = document.getElementById("categories-tbody");
+
+  let categories = [];
+
+  function fetchCategories() {
+    db.collection("categories").get()
+      .then(snapshot => {
+        categories = snapshot.docs.map(doc => ({
+          id: doc.id,
+          name: doc.data().name
+        }));
+        renderCategories();
+      })
+      .catch(err => console.error("❌ خطأ في جلب التصنيفات:", err.message));
+  }
 
   function renderCategories() {
-    categoryTable.innerHTML = "";
-    db.collection("categories").orderBy("name").get().then(snapshot => {
-      snapshot.forEach(doc => {
-        const cat = doc.data();
-        const id = doc.id;
-
-        const row = document.createElement("tr");
-        row.innerHTML = `
-          <td>${cat.name}</td>
-          <td>
-            <button class="btn btn-sm btn-danger" onclick="deleteCategory('${id}')">🗑 حذف</button>
-            <button class="btn btn-sm btn-primary" onclick="editCategory('${id}', '${cat.name}')">✏️ تعديل</button>
-          </td>
-        `;
-        categoryTable.appendChild(row);
-      });
+    tbody.innerHTML = "";
+    categories.forEach(cat => {
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>${cat.name}</td>
+        <td>
+          <button class="btn btn-sm btn-primary me-1" onclick="editCategory('${cat.id}', '${cat.name}')">✏️ تعديل</button>
+          <button class="btn btn-sm btn-danger" onclick="deleteCategory('${cat.id}', '${cat.name}')">🗑 حذف</button>
+        </td>
+      `;
+      tbody.appendChild(row);
     });
   }
 
-  window.deleteCategory = function (id) {
-    if (confirm("⚠️ هل تريد حذف هذا التصنيف؟")) {
-      db.collection("categories").doc(id).delete().then(() => {
-        alert("✅ تم حذف التصنيف");
-        renderCategories();
+  window.deleteCategory = function (docId, categoryName) {
+    db.collection("books").where("category", "==", categoryName).get()
+      .then(snapshot => {
+        if (!snapshot.empty) return alert("🚫 لا يمكن حذف هذا التصنيف لأنه مرتبط بكتب.");
+
+        if (confirm("⚠️ هل تريد حذف هذا التصنيف؟")) {
+          db.collection("categories").doc(docId).delete()
+            .then(() => {
+              alert("✅ تم الحذف");
+              fetchCategories();
+            })
+            .catch(err => alert("❌ خطأ أثناء الحذف: " + err.message));
+        }
       });
-    }
   }
 
-  window.editCategory = function (id, oldName) {
-    const newName = prompt("✏️ أدخل اسم جديد للتصنيف:", oldName);
-    if (newName && newName.trim() !== "") {
-      db.collection("categories").doc(id).update({ name: newName.trim() }).then(() => {
-        alert("✅ تم تعديل التصنيف");
-        renderCategories();
-      });
-    }
+  window.editCategory = function (docId, currentName) {
+    const newName = prompt("✏️ أدخل الاسم الجديد:", currentName);
+    if (!newName || categories.some(c => c.name === newName)) return alert("🚫 الاسم فارغ أو موجود مسبقًا");
+
+    db.collection("categories").doc(docId).update({ name: newName })
+      .then(() => {
+        alert("✅ تم التعديل");
+        fetchCategories();
+      })
+      .catch(err => alert("❌ خطأ أثناء التعديل: " + err.message));
   }
 
-  addCategoryBtn.addEventListener("click", () => {
-    const name = categoryInputField.value.trim();
-    if (!name) return alert("❗ الرجاء إدخال اسم التصنيف");
+  addCategoryBtn.addEventListener("click", function () {
+    const name = nameInput.value.trim();
+    if (!name) return alert("❗ الرجاء كتابة اسم التصنيف");
+    if (categories.some(cat => cat.name === name)) return alert("⚠️ التصنيف موجود مسبقًا");
 
-    db.collection("categories").add({ name }).then(() => {
-      alert("✅ تم إضافة التصنيف");
-      categoryInputField.value = "";
-      renderCategories();
-    });
+    db.collection("categories").add({ name })
+      .then(() => {
+        alert("✅ تم إضافة التصنيف");
+        nameInput.value = "";
+        fetchCategories();
+      })
+      .catch(err => alert("❌ خطأ أثناء الإضافة: " + err.message));
   });
 
-  renderCategories();
+  fetchCategories();
 });
