@@ -12,8 +12,6 @@
   <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore-compat.js"></script>
-
-  <!-- Firebase init -->
   <script>
     const firebaseConfig = {
       apiKey: "AIzaSyDJq89s9gs3lGKj1eKM0eDD0Mein6mmm50",
@@ -33,8 +31,19 @@
 
 <body class="bg-light">
   <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
-    <div class="container">
+    <div class="container-fluid">
       <a class="navbar-brand" href="admin.html">👑 لوحة تحكم الأدمن</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#adminNavbar">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="adminNavbar">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item"><a class="nav-link" href="admin.html">🏠 الرئيسية</a></li>
+          <li class="nav-item"><a class="nav-link active" href="admin-stats.html">📊 الإحصائيات</a></li>
+          <li class="nav-item"><a class="nav-link" href="index.html">🔙 العودة للموقع</a></li>
+          <li class="nav-item"><button class="btn btn-danger ms-3" id="admin-logout-btn">🚪 تسجيل الخروج</button></li>
+        </ul>
+      </div>
     </div>
   </nav>
 

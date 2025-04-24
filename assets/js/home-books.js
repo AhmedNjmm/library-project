@@ -22,7 +22,7 @@ document.addEventListener("DOMContentLoaded", function () {
             <div class="card-body text-center">
               <h5 class="card-title">${book.title}</h5>
               <p class="card-text">📦 النسخ المتاحة: <strong>${book.available}</strong></p>
-              <a href="book-details.html?title=${encodeURIComponent(book.title)}" class="btn btn-primary">📖 تفاصيل الكتاب</a>
+              <a href="book-details.html?id=${book.id}" class="btn btn-primary">📖 تفاصيل الكتاب</a>
             </div>
           </div>
         `;

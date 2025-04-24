@@ -31,6 +31,7 @@
     <ul class="list-group" id="borrowed-list"></ul>
     <div class="text-center mt-4">
       <button class="btn btn-danger w-100" onclick="logout()">🚪 تسجيل الخروج</button>
+      <a href="index.html" class="btn btn-outline-secondary w-100 mt-3">🔙 العودة للرئيسية</a>
     </div>
   </div>
 
@@ -38,7 +39,6 @@
     const db = firebase.firestore();
     firebase.auth().onAuthStateChanged(async user => {
       if (!user) {
-        alert("🚫 يجب تسجيل الدخول أولاً!");
         window.location.href = "login.html";
         return;
       }
@@ -69,14 +69,12 @@
     });
 
     function logout() {
-  firebase.auth().signOut().then(() => {
-    localStorage.removeItem("isAdmin"); // إذا حابب تحتفظ بهذا
-    window.location.href = "login.html";
-  }).catch((error) => {
-    alert("❌ خطأ أثناء تسجيل الخروج: " + error.message);
-  });
-}
-
+      firebase.auth().signOut().then(() => {
+        window.location.href = "login.html";
+      }).catch((error) => {
+        alert("❌ خطأ أثناء تسجيل الخروج: " + error.message);
+      });
+    }
 
     function returnBook(borrowId) {
       if (confirm("هل أنت متأكد من أنك تريد إرجاع هذا الكتاب؟")) {

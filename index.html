@@ -47,31 +47,32 @@
         <a class="btn btn-primary ms-md-2" role="button" id="auth-button-container" href="#"></a>
       </div>
       <script>
-        document.addEventListener("DOMContentLoaded", function () {
-          const container = document.getElementById("auth-button-container");
-          const email = localStorage.getItem("userEmail");
-          const isAdmin = localStorage.getItem("isAdmin") === "true";
+          document.addEventListener("DOMContentLoaded", function () {
+    const container = document.getElementById("auth-button-container");
 
-          if (email) {
-            let adminBtn = isAdmin ? `<a class="btn btn-warning me-2" href="admin.html">⚙️ لوحة التحكم</a>` : "";
-            container.innerHTML = `
-              <a class="btn btn-info me-2" href="my-account.html">👤 حسابي</a>
-              ${adminBtn}
-              <button class="btn btn-danger" onclick="logout()">🚪 تسجيل الخروج</button>
-            `;
-          } else {
-            container.innerHTML = `<a class="btn btn-success" href="login.html">🔐 تسجيل الدخول</a>`;
-          }
-        });
-
-        function logout() {
-  firebase.auth().signOut().then(() => {
-    localStorage.removeItem("isAdmin"); // إذا حابب تحتفظ بهذا
-    window.location.href = "login.html";
-  }).catch((error) => {
-    alert("❌ خطأ أثناء تسجيل الخروج: " + error.message);
+    firebase.auth().onAuthStateChanged(user => {
+      if (user) {
+        const isAdmin = user.email === "admin@library.com";
+        let adminBtn = isAdmin ? `<a class="btn btn-warning me-2" href="admin.html">⚙️ لوحة التحكم</a>` : "";
+        container.innerHTML = `
+          <a class="btn btn-info me-2" href="my-account.html">👤 حسابي</a>
+          ${adminBtn}
+          <button class="btn btn-danger" onclick="logout()">🚪 تسجيل الخروج</button>
+        `;
+      } else {
+        container.innerHTML = `<a class="btn btn-success" href="login.html">🔐 تسجيل الدخول</a>`;
+      }
+    });
   });
-}
+
+  function logout() {
+    firebase.auth().signOut().then(() => {
+      localStorage.removeItem("isAdmin");
+      window.location.href = "login.html";
+    }).catch((error) => {
+      alert("❌ خطأ أثناء تسجيل الخروج: " + error.message);
+    });
+  }
 
       </script>
     </div>
