@@ -1,89 +1,211 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Welcome to Firebase Hosting</title>
+<html lang="ar" dir="rtl" data-bs-theme="light">
 
-    <!-- update the version number as needed -->
-    <script defer src="/__/firebase/11.6.0/firebase-app-compat.js"></script>
-    <!-- include only the Firebase features as you need -->
-    <script defer src="/__/firebase/11.6.0/firebase-auth-compat.js"></script>
-    <script defer src="/__/firebase/11.6.0/firebase-database-compat.js"></script>
-    <script defer src="/__/firebase/11.6.0/firebase-firestore-compat.js"></script>
-    <script defer src="/__/firebase/11.6.0/firebase-functions-compat.js"></script>
-    <script defer src="/__/firebase/11.6.0/firebase-messaging-compat.js"></script>
-    <script defer src="/__/firebase/11.6.0/firebase-storage-compat.js"></script>
-    <script defer src="/__/firebase/11.6.0/firebase-analytics-compat.js"></script>
-    <script defer src="/__/firebase/11.6.0/firebase-remote-config-compat.js"></script>
-    <script defer src="/__/firebase/11.6.0/firebase-performance-compat.js"></script>
-    <!-- 
-      initialize the SDK after all desired features are loaded, set useEmulator to false
-      to avoid connecting the SDK to running emulators.
-    -->
-    <script defer src="/__/firebase/init.js?useEmulator=true"></script>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>📚 جميع الكتب - مكتبة الجامعة</title>
+  <link rel="stylesheet" href="assets/bootstrap/css/bootstrap.min.css">
+  <link rel="stylesheet" href="assets/css/styles.css">
 
-    <style media="screen">
-      body { background: #ECEFF1; color: rgba(0,0,0,0.87); font-family: Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 0; }
-      #message { background: white; max-width: 360px; margin: 100px auto 16px; padding: 32px 24px; border-radius: 3px; }
-      #message h2 { color: #ffa100; font-weight: bold; font-size: 16px; margin: 0 0 8px; }
-      #message h1 { font-size: 22px; font-weight: 300; color: rgba(0,0,0,0.6); margin: 0 0 16px;}
-      #message p { line-height: 140%; margin: 16px 0 24px; font-size: 14px; }
-      #message a { display: block; text-align: center; background: #039be5; text-transform: uppercase; text-decoration: none; color: white; padding: 16px; border-radius: 4px; }
-      #message, #message a { box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24); }
-      #load { color: rgba(0,0,0,0.4); text-align: center; font-size: 13px; }
-      @media (max-width: 600px) {
-        body, #message { margin-top: 0; background: white; box-shadow: none; }
-        body { border-top: 16px solid #ffa100; }
-      }
-    </style>
-  </head>
-  <body>
-    <div id="message">
-      <h2>Welcome</h2>
-      <h1>Firebase Hosting Setup Complete</h1>
-      <p>You're seeing this because you've successfully setup Firebase Hosting. Now it's time to go build something extraordinary!</p>
-      <a target="_blank" href="https://firebase.google.com/docs/hosting/">Open Hosting Documentation</a>
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore-compat.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyDJq89s9gs3lGKj1eKM0eDD0Mein6mmm50",
+      authDomain: "library-project-f63b0.firebaseapp.com",
+      projectId: "library-project-f63b0",
+      storageBucket: "library-project-f63b0.appspot.com",
+      messagingSenderId: "91581535655",
+      appId: "1:91581535655:web:380c1e059ab48008855282"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+  </script>
+</head>
+
+<body class="bg-light">
+  <nav class="navbar navbar-expand-md bg-primary navbar-dark py-3">
+    <div class="container">
+      <a class="navbar-brand" href="index.html">📚 مكتبة الجامعة</a>
+      <button class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navcol-1">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navcol-1">
+        <ul class="navbar-nav ms-auto align-items-center">
+          <li class="nav-item"><a class="nav-link" href="index.html">الرئيسية</a></li>
+          <li class="nav-item"><a class="nav-link active" href="books.html">الكتب</a></li>
+          <li class="nav-item"><a class="nav-link" href="about.html">من نحن</a></li>
+          <li class="nav-item"><a class="nav-link" href="my-account.html">👤 حسابي</a></li>
+        </ul>
+        <div id="auth-button-container" class="ms-2"></div>
+      </div>
     </div>
-    <p id="load">Firebase SDK Loading&hellip;</p>
+  </nav>
 
-    <script>
-      document.addEventListener('DOMContentLoaded', function() {
-        const loadEl = document.querySelector('#load');
-        // // 🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
-        // // The Firebase SDK is initialized and available here!
-        //
-        // firebase.auth().onAuthStateChanged(user => { });
-        // firebase.database().ref('/path/to/ref').on('value', snapshot => { });
-        // firebase.firestore().doc('/foo/bar').get().then(() => { });
-        // firebase.functions().httpsCallable('yourFunction')().then(() => { });
-        // firebase.messaging().requestPermission().then(() => { });
-        // firebase.storage().ref('/path/to/ref').getDownloadURL().then(() => { });
-        // firebase.analytics(); // call to activate
-        // firebase.analytics().logEvent('tutorial_completed');
-        // firebase.performance(); // call to activate
-        //
-        // // 🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
+  <div class="container my-4">
+    <h1 class="text-center">📚 جميع الكتب</h1>
+    <div class="d-flex flex-wrap gap-2 justify-content-center mb-3" id="category-filters">
+      <button class="btn btn-outline-primary filter-btn" data-category="All">الكل</button>
+    </div>
+    <form id="search-form" class="mb-3">
+      <div class="input-group">
+        <input type="text" class="form-control" id="search-input" placeholder="🔍 ابحث عن كتاب">
+        <button class="btn btn-outline-secondary" type="submit">بحث</button>
+      </div>
+    </form>
+    <div class="row row-cols-1 row-cols-md-3 g-4" id="books-row"></div>
+    <p class="text-center text-muted mt-4" id="no-books" style="display:none">لا توجد كتب في هذا التصنيف</p>
+  </div>
 
-        try {
-          let app = firebase.app();
-          let features = [
-            'auth', 
-            'database', 
-            'firestore',
-            'functions',
-            'messaging', 
-            'storage', 
-            'analytics', 
-            'remoteConfig',
-            'performance',
-          ].filter(feature => typeof app[feature] === 'function');
-          loadEl.textContent = `Firebase SDK loaded with ${features.join(', ')}`;
-        } catch (e) {
-          console.error(e);
-          loadEl.textContent = 'Error loading the Firebase SDK, check the console.';
+  <script>
+    const booksRow = document.getElementById("books-row");
+    const noBooksMsg = document.getElementById("no-books");
+    const searchForm = document.getElementById("search-form");
+    const searchInput = document.getElementById("search-input");
+    const categoryFilters = document.getElementById("category-filters");
+    const authBtnContainer = document.getElementById("auth-button-container");
+
+    let allBooks = [];
+    let currentUser = null;
+    let userBorrows = [];
+
+    firebase.auth().onAuthStateChanged(async user => {
+      if (user) {
+        currentUser = user;
+        const snapshot = await db.collection("borrows").where("user", "==", user.email).get();
+        userBorrows = snapshot.docs.map(doc => doc.data().bookTitle);
+        authBtnContainer.innerHTML = `<button class="btn btn-danger" onclick="logout()">🚪 تسجيل الخروج</button>`;
+      } else {
+        authBtnContainer.innerHTML = `<a class="btn btn-success" href="login.html">🔐 تسجيل الدخول</a>`;
+      }
+      fetchBooks();
+    });
+
+    function renderBooks(books) {
+      booksRow.innerHTML = "";
+      if (books.length === 0) {
+        noBooksMsg.style.display = "block";
+        return;
+      }
+      noBooksMsg.style.display = "none";
+
+      books.forEach(book => {
+        const col = document.createElement("div");
+        col.className = "col";
+
+        let actionBtn = "";
+        const isBorrowed = currentUser && userBorrows.includes(book.title);
+
+        if (isBorrowed) {
+          actionBtn = `<button class="btn btn-danger mt-2 w-100" onclick="returnBook('${book.id}', '${book.title}')">🔁 إرجاع</button>`;
+        } else if (!currentUser) {
+          actionBtn = `<button class="btn btn-secondary mt-2 w-100" onclick="alert('🚫 يجب تسجيل الدخول أولاً!')">📚 تسجيل الدخول للاستعارة</button>`;
+        } else if (book.available <= 0) {
+          actionBtn = `<button class="btn btn-secondary mt-2 w-100" disabled>🚫 لا توجد نسخ متاحة</button>`;
+        } else {
+          actionBtn = `<button class="btn btn-success mt-2 w-100" onclick="borrowBook('${book.id}', '${book.title}')">📚 استعارة</button>`;
         }
+
+        col.innerHTML = `
+          <div class="card h-100">
+            <img src="${book.image}" class="card-img-top" alt="...">
+            <div class="card-body text-center">
+              <h5 class="card-title">${book.title}</h5>
+              <p class="card-text">${book.description.substring(0, 100)}...</p>
+              <p><span class="badge bg-info">${book.category}</span></p>
+              <a href="book-details.html?id=${book.id}" class="btn btn-primary w-100">عرض التفاصيل</a>
+              ${actionBtn}
+            </div>
+          </div>
+        `;
+        booksRow.appendChild(col);
       });
-    </script>
-  </body>
+    }
+
+    function fetchBooks() {
+      db.collection("books").get()
+        .then(snapshot => {
+          allBooks = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+          renderBooks(allBooks);
+          renderCategories([...new Set(allBooks.map(b => b.category))]);
+        });
+    }
+
+    function renderCategories(categories) {
+      categoryFilters.innerHTML = '<button class="btn btn-outline-primary filter-btn" data-category="All">الكل</button>';
+      categories.forEach(cat => {
+        const btn = document.createElement("button");
+        btn.className = "btn btn-outline-secondary filter-btn";
+        btn.textContent = cat;
+        btn.dataset.category = cat;
+        categoryFilters.appendChild(btn);
+      });
+    }
+
+    categoryFilters.addEventListener("click", function (e) {
+      if (e.target.classList.contains("filter-btn")) {
+        const selected = e.target.dataset.category;
+        if (selected === "All") {
+          renderBooks(allBooks);
+        } else {
+          renderBooks(allBooks.filter(b => b.category === selected));
+        }
+      }
+    });
+
+    searchForm.addEventListener("submit", function (e) {
+      e.preventDefault();
+      const query = searchInput.value.trim().toLowerCase();
+      const results = allBooks.filter(b => b.title.toLowerCase().includes(query));
+      renderBooks(results);
+    });
+
+    async function borrowBook(bookId, bookTitle) {
+      const now = new Date();
+      const date = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+
+      await db.collection("borrows").add({
+        user: currentUser.email,
+        bookTitle,
+        date
+      });
+
+      await db.collection("books").doc(bookId).update({
+        available: firebase.firestore.FieldValue.increment(-1)
+      });
+
+      alert("✅ تم استعارة الكتاب!");
+      location.reload();
+    }
+
+    async function returnBook(bookId, bookTitle) {
+      const snapshot = await db.collection("borrows")
+        .where("user", "==", currentUser.email)
+        .where("bookTitle", "==", bookTitle).get();
+
+      if (!snapshot.empty) {
+        await db.collection("borrows").doc(snapshot.docs[0].id).delete();
+        await db.collection("books").doc(bookId).update({
+          available: firebase.firestore.FieldValue.increment(1)
+        });
+        alert("🔁 تم إرجاع الكتاب!");
+        location.reload();
+      }
+    }
+
+    function logout() {
+      firebase.auth().signOut().then(() => {
+        localStorage.removeItem("userEmail");
+        window.location.href = "login.html";
+      }).catch(error => {
+        alert("❌ حدث خطأ أثناء تسجيل الخروج: " + error.message);
+      });
+    }
+  </script>
+  <script src="assets/bootstrap/js/bootstrap.min.js"></script>
+</body>
+
 </html>
