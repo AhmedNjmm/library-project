@@ -69,6 +69,20 @@
     const authBtnContainer = document.getElementById("auth-button-container");
 
     let allBooks = [];
+    let currentUser = null;
+    let userBorrows = [];
+
+    firebase.auth().onAuthStateChanged(async user => {
+      if (user) {
+        currentUser = user;
+        const snapshot = await db.collection("borrows").where("user", "==", user.email).get();
+        userBorrows = snapshot.docs.map(doc => doc.data().bookTitle);
+        authBtnContainer.innerHTML = `<button class="btn btn-danger" onclick="logout()">🚪 تسجيل الخروج</button>`;
+      } else {
+        authBtnContainer.innerHTML = `<a class="btn btn-success" href="login.html">🔐 تسجيل الدخول</a>`;
+      }
+      fetchBooks();
+    });
 
     function renderBooks(books) {
       booksRow.innerHTML = "";
@@ -78,25 +92,32 @@
       }
       noBooksMsg.style.display = "none";
 
-      const email = localStorage.getItem("userEmail");
-
       books.forEach(book => {
         const col = document.createElement("div");
         col.className = "col";
 
-        const borrowButton = email
-          ? `<button class="btn btn-success mt-2" onclick="borrowFromCard('${book.id}', '${book.title}')">📚 استعارة</button>`
-          : `<button class="btn btn-secondary mt-2" onclick="alert('🚫 يجب تسجيل الدخول أولاً!')">📚 تسجيل الدخول للاستعارة</button>`;
+        let actionBtn = "";
+        const isBorrowed = currentUser && userBorrows.includes(book.title);
+
+        if (isBorrowed) {
+          actionBtn = `<button class="btn btn-danger mt-2 w-100" onclick="returnBook('${book.id}', '${book.title}')">🔁 إرجاع</button>`;
+        } else if (!currentUser) {
+          actionBtn = `<button class="btn btn-secondary mt-2 w-100" onclick="alert('🚫 يجب تسجيل الدخول أولاً!')">📚 تسجيل الدخول للاستعارة</button>`;
+        } else if (book.available <= 0) {
+          actionBtn = `<button class="btn btn-secondary mt-2 w-100" disabled>🚫 لا توجد نسخ متاحة</button>`;
+        } else {
+          actionBtn = `<button class="btn btn-success mt-2 w-100" onclick="borrowBook('${book.id}', '${book.title}')">📚 استعارة</button>`;
+        }
 
         col.innerHTML = `
           <div class="card h-100">
             <img src="${book.image}" class="card-img-top" alt="...">
-            <div class="card-body">
+            <div class="card-body text-center">
               <h5 class="card-title">${book.title}</h5>
               <p class="card-text">${book.description.substring(0, 100)}...</p>
               <p><span class="badge bg-info">${book.category}</span></p>
               <a href="book-details.html?id=${book.id}" class="btn btn-primary w-100">عرض التفاصيل</a>
-              ${borrowButton}
+              ${actionBtn}
             </div>
           </div>
         `;
@@ -114,6 +135,7 @@
     }
 
     function renderCategories(categories) {
+      categoryFilters.innerHTML = '<button class="btn btn-outline-primary filter-btn" data-category="All">الكل</button>';
       categories.forEach(cat => {
         const btn = document.createElement("button");
         btn.className = "btn btn-outline-secondary filter-btn";
@@ -141,52 +163,38 @@
       renderBooks(results);
     });
 
-    async function borrowFromCard(bookId, bookTitle) {
-      const userEmail = localStorage.getItem("userEmail");
-      if (!userEmail) {
-        alert("🚫 يجب تسجيل الدخول أولاً!");
-        return;
-      }
-
-      const bookRef = db.collection("books").doc(bookId);
-      const bookSnap = await bookRef.get();
-
-      if (!bookSnap.exists) return alert("❌ الكتاب غير موجود.");
-      const book = bookSnap.data();
-
-      if (book.available <= 0) return alert("🚫 لا توجد نسخ متاحة.");
-
-      const borrowSnap = await db.collection("borrows")
-        .where("user", "==", userEmail)
-        .where("bookTitle", "==", bookTitle)
-        .get();
-
-      if (!borrowSnap.empty) return alert("📚 لقد استعرت هذا الكتاب مسبقاً.");
-
+    async function borrowBook(bookId, bookTitle) {
       const now = new Date();
       const date = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
 
       await db.collection("borrows").add({
-        user: userEmail,
-        bookTitle: bookTitle,
-        date: date
+        user: currentUser.email,
+        bookTitle,
+        date
       });
 
-      await bookRef.update({ available: book.available - 1 });
+      await db.collection("books").doc(bookId).update({
+        available: firebase.firestore.FieldValue.increment(-1)
+      });
 
       alert("✅ تم استعارة الكتاب!");
-      fetchBooks();
+      location.reload();
     }
 
-    fetchBooks();
+    async function returnBook(bookId, bookTitle) {
+      const snapshot = await db.collection("borrows")
+        .where("user", "==", currentUser.email)
+        .where("bookTitle", "==", bookTitle).get();
 
-    firebase.auth().onAuthStateChanged(user => {
-      if (user) {
-        authBtnContainer.innerHTML = `<button class="btn btn-danger" onclick="logout()">🚪 تسجيل الخروج</button>`;
-      } else {
-        authBtnContainer.innerHTML = `<a class="btn btn-success" href="login.html">🔐 تسجيل الدخول</a>`;
+      if (!snapshot.empty) {
+        await db.collection("borrows").doc(snapshot.docs[0].id).delete();
+        await db.collection("books").doc(bookId).update({
+          available: firebase.firestore.FieldValue.increment(1)
+        });
+        alert("🔁 تم إرجاع الكتاب!");
+        location.reload();
       }
-    });
+    }
 
     function logout() {
       firebase.auth().signOut().then(() => {
